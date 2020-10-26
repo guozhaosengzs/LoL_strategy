@@ -18,16 +18,28 @@ unique(x)
 # Remake a less confusing data set
 colnames(data.train)
 data.train.lite <- data.train %>% 
-  select(blueWins, blueFirstBlood, blueKills, blueDeaths, blueDragons, blueGoldDiff, blueExperienceDiff)
+  select(blueWins, blueFirstBlood, blueGoldDiff, blueExperienceDiff)
+
+data.train.lite$blueDragonsDiff <- data.train$blueDragons - data.train$redDragons 
 
 data.train.lite$killParticipationDiff <- data.train$blueAssists - data.train$redAssists
 data.train.lite$visionScore <- 
   data.train$blueWardsPlaced + data.train$blueWardsDestroyed - data.train$redWardsPlaced - data.train$redWardsDestroyed
+data.train.lite$blueKillDiff <- data.train$blueKills -  data.train$blueDeaths
+
+data.train.lite$blueFirstBlood = as.factor(data.train.lite$blueFirstBlood)
+data.train.lite$blueDragonsDiff = as.factor(data.train.lite$blueDragonsDiff)
 
 # First try at a logistic regression model
-
-model1 <- glm(data = data.train.lite, blueWins ~., family=binomial())
+model1 <- glm(data = data.train.lite, blueWins ~., family='binomial')
 summary(model1)
 
+plot(data.train.lite$blueGoldDiff, data.train.lite$blueWins)
+plot(data.train.lite$blueExperienceDiff, data.train.lite$blueWins)
 
-# Multinomial logistic regression?
+mt <- table(data.train.lite$blueDragonsDiff, data.train.lite$blueWins)
+barplot(prop.table(mt, margin = 2))
+
+# What contributed to more gold?
+
+model2 <- glm(data = data.train, blueWins ~ , family='binomial')
